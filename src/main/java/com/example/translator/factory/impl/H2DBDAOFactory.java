@@ -3,23 +3,17 @@ package com.example.translator.factory.impl;
 import com.example.translator.dao.impl.TranslationDAOImpl;
 import com.example.translator.factory.DAOFactory;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import static com.example.translator.constant.JDBCConectionParametersKeeper.*;
+
 @NoArgsConstructor
 @PropertySource("classpath:application.properties")
 public class H2DBDAOFactory extends DAOFactory {
-
-    @Value(value = "${spring.datasource.url}")
-    private String url;
-    @Value(value = "${spring.datasource.username}")
-    private String user;
-    @Value(value = "${spring.datasource.password}")
-    private String password;
 
     private static volatile H2DBDAOFactory instance;
     private Connection connection;
@@ -37,7 +31,7 @@ public class H2DBDAOFactory extends DAOFactory {
 
     private void connected() throws SQLException {
 
-        connection = DriverManager.getConnection("jdbc:h2:mem:DB", "sa", "");
+        connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
 
     @Override

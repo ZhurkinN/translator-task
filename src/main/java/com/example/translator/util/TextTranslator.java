@@ -2,7 +2,6 @@ package com.example.translator.util;
 
 import com.example.translator.dao.impl.TranslationDAOImpl;
 import com.example.translator.dto.TranslationResultsDTO;
-import com.example.translator.exception.TranslationRuleNotFoundException;
 import yandex.cloud.api.ai.translate.v2.TranslationServiceGrpc;
 import yandex.cloud.api.ai.translate.v2.TranslationServiceGrpc.TranslationServiceBlockingStub;
 import yandex.cloud.api.ai.translate.v2.TranslationServiceOuterClass;
@@ -10,19 +9,15 @@ import yandex.cloud.api.ai.translate.v2.TranslationServiceOuterClass.TranslateRe
 import yandex.cloud.sdk.ServiceFactory;
 import yandex.cloud.sdk.auth.Auth;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.Duration;
 
-import static com.example.translator.constant.YandexCloudAuthDataKeeper.FOLDER_ID;
-import static com.example.translator.constant.YandexCloudAuthDataKeeper.IAM_TOKEN;
+import static com.example.translator.constant.YandexCloudAuthDataKeeper.*;
 
 public class TextTranslator {
 
-    private static final long DURATION_TIME = 30l;
-    private static final int TRANSLATED_ELEMENT_INDEX = 0;
-
     public static String translateText(String inputText, String sourceLanguage, String targetLanguage)
-            throws TranslationRuleNotFoundException {
+            throws RuntimeException {
 
         TranslationServiceBlockingStub service = configureTranslationService();
         TranslateRequest request = createTranslateRequest(inputText, sourceLanguage, targetLanguage);
@@ -39,7 +34,7 @@ public class TextTranslator {
     }
 
     private static TranslateRequest createTranslateRequest(String inputText, String sourceLanguage, String targetLanguage)
-            throws TranslationRuleNotFoundException {
+            throws RuntimeException {
 
         return TranslateRequest.newBuilder()
                 .setSourceLanguageCode(sourceLanguage)
@@ -59,7 +54,7 @@ public class TextTranslator {
     public static TranslationResultsDTO translateSingleWords(String inputText, String sourceLanguage,
                                                              String targetLanguage) {
 
-        String[] inputWords = StringHandler.separateString(inputText);
+        String[] inputWords = StringHandler.separateString(inputText.replaceAll("\\s+", "\u0020"));
         String[] translatedWords = new String[inputWords.length];
         for (int i = 0; i < inputWords.length; i++) {
             translatedWords[i] = TextTranslator.translateText(inputWords[i], sourceLanguage, targetLanguage);
@@ -68,9 +63,9 @@ public class TextTranslator {
         return new TranslationResultsDTO(StringHandler.uniteString(translatedWords), inputWords, translatedWords);
     }
 
-    public static String insertAllInfo(Long id, Date date, String inputText, String translationRule,
-                                     String ip, TranslationResultsDTO dto, TranslationDAOImpl dao) {
-        dao.addRequestInfo(id, date, inputText, dto.getTranslatedText(),
+    public static String insertAllInfo(Long id, Timestamp time, String inputText, String translationRule,
+                                       String ip, TranslationResultsDTO dto, TranslationDAOImpl dao) {
+        dao.addRequestInfo(id, time, inputText, dto.getTranslatedText(),
                 translationRule, ip);
 
         for (int i = 0; i < dto.getInputWords().length; i++) {

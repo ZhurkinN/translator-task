@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
+import javax.servlet.http.HttpServletRequest;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 @RestController
 @RequestMapping("api/v1")
@@ -25,7 +26,7 @@ import java.sql.SQLException;
 public class TranslatorController {
 
     @PostMapping(value = "/translate", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseDTO> getTranslation(@RequestBody RequestDTO dto)
+    public ResponseEntity<ResponseDTO> getTranslation(@RequestBody RequestDTO dto, HttpServletRequest request)
             throws SQLException {
 
         TranslationDAOImpl dao = H2DBDAOFactory.getInstance()
@@ -36,12 +37,14 @@ public class TranslatorController {
         String translationRule = dto.getTranslationRule();
         String sourceLanguage = new TranslationRuleHandler(translationRule).getSourceLanguage();
         String targetLanguage = new TranslationRuleHandler(translationRule).getTargetLanguage();
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        String ip = request.getRemoteAddr();
 
         TranslationResultsDTO translationResults = TextTranslator.translateSingleWords(inputText,
                 sourceLanguage, targetLanguage);
 
-        String translatedText = TextTranslator.insertAllInfo(id, new Date(12, 12, 12), inputText,
-                translationRule, "aa", translationResults, dao);
+        String translatedText = TextTranslator.insertAllInfo(id, time, inputText,
+                translationRule, ip, translationResults, dao);
 
         return ResponseEntity.ok(new ResponseDTO(translatedText));
     }
