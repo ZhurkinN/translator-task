@@ -9,7 +9,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static com.example.translator.constant.JDBCConectionParametersKeeper.*;
+import static com.example.translator.constant.JDBCConnectionParametersKeeper.*;
 
 @NoArgsConstructor
 @PropertySource("classpath:application.properties")

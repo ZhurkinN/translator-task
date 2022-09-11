@@ -31,7 +31,6 @@ public class TranslatorController {
 
         TranslationDAOImpl dao = H2DBDAOFactory.getInstance()
                 .getTranslationDAO();
-
         Long id = IdRandomizer.randomizeId();
         String inputText = dto.getInputText();
         String translationRule = dto.getTranslationRule();

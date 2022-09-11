@@ -69,7 +69,8 @@ public class TextTranslator {
                 translationRule, ip);
 
         for (int i = 0; i < dto.getInputWords().length; i++) {
-            dao.addTranslationInfo(id, dto.getInputWords()[i], dto.getTranslatedWords()[i]);
+            dao.addTranslationInfo(id, dto.getInputWords()[i].replaceAll("[-+.^:*=',]",""),
+                    dto.getTranslatedWords()[i].replaceAll("[-+.^:*=',]",""));
         }
         return dto.getTranslatedText();
     }
