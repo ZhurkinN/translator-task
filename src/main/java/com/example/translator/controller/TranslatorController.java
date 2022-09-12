@@ -5,10 +5,13 @@ import com.example.translator.dto.RequestDTO;
 import com.example.translator.dto.ResponseDTO;
 import com.example.translator.dto.TranslationResultsDTO;
 import com.example.translator.factory.impl.H2DBDAOFactory;
+import com.example.translator.service.TranslationService;
 import com.example.translator.util.IdRandomizer;
 import com.example.translator.util.TextTranslator;
 import com.example.translator.util.TranslationRuleHandler;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,27 +28,13 @@ import java.sql.Timestamp;
 @RequiredArgsConstructor
 public class TranslatorController {
 
+    @Autowired
+    private TranslationService service;
     @PostMapping(value = "/translate", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ResponseDTO> getTranslation(@RequestBody RequestDTO dto, HttpServletRequest request)
             throws SQLException {
 
-        TranslationDAOImpl dao = H2DBDAOFactory.getInstance()
-                .getTranslationDAO();
-        Long id = IdRandomizer.randomizeId();
-        String inputText = dto.getInputText();
-        String translationRule = dto.getTranslationRule();
-        String sourceLanguage = new TranslationRuleHandler(translationRule).getSourceLanguage();
-        String targetLanguage = new TranslationRuleHandler(translationRule).getTargetLanguage();
-        Timestamp time = new Timestamp(System.currentTimeMillis());
-        String ip = request.getRemoteAddr();
-
-        TranslationResultsDTO translationResults = TextTranslator.translateSingleWords(inputText,
-                sourceLanguage, targetLanguage);
-
-        String translatedText = TextTranslator.insertAllInfo(id, time, inputText,
-                translationRule, ip, translationResults, dao);
-
-        return ResponseEntity.ok(new ResponseDTO(translatedText));
+        return ResponseEntity.ok(new ResponseDTO(service.translateText(dto, request)));
     }
 
 }
